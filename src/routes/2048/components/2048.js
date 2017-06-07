@@ -3,14 +3,15 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import './2048.scss'
 
-export const _2048 = ({ values, pointerMove, keyPress, gameover }) => (
+export const _2048 = ({ values, pointerMove, keyUp, click, gameover }) => (
   <div className='_2048'>
     <input
       className='_2048__input'
       autoFocus
       onKeyPress={(e) => { e.preventDefault() }}
-      onKeyUp={(e) => keyPress(e.key)}
+      onKeyUp={(e) => keyUp(e.key)}
       onMouseMove={(e) => pointerMove(e.buttons, e.screenX, e.screenY)}
+      onClick={click}
     />
     <table className='_2048__table' >
       <tbody>
@@ -34,7 +35,8 @@ export const _2048 = ({ values, pointerMove, keyPress, gameover }) => (
 _2048.propTypes = {
   values: ImmutablePropTypes.listOf(ImmutablePropTypes.listOf(React.PropTypes.number)),
   pointerMove: React.PropTypes.func,
-  keyPress: React.PropTypes.func,
+  keyUp: React.PropTypes.func,
+  click: React.PropTypes.func,
   gameover: React.PropTypes.bool
 }
 

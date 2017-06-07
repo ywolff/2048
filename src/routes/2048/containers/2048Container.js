@@ -1,6 +1,6 @@
 import { connect } from 'react-redux'
 
-import { pointerMove, keyPress } from '../modules/2048'
+import { pointerMove, keyUp, click } from '../modules/2048'
 
 /*  This is a container component. Notice it does not contain any JSX,
     nor does it import React. This component is **only** responsible for
@@ -15,7 +15,8 @@ import _2048 from '../components/2048'
 
 const mapDispatchToProps = {
   pointerMove,
-  keyPress
+  keyUp,
+  click
 }
 
 const mapStateToProps = (state) => ({

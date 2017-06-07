@@ -3,8 +3,8 @@ import { Map, fromJS } from 'immutable'
 // ------------------------------------
 // Constants
 // ------------------------------------
-export const POINTER_MOVE = 'POINTER_MOVE'
-export const KEY_PRESS = 'KEY_PRESS'
+export const POINTER = 'POINTER'
+export const KEY_UP = 'KEY_UP'
 
 const TABLE_SIZE = 4
 const EMPTY_TABLE = [
@@ -23,13 +23,13 @@ const updateOnPointerMove = (state, action) => {
   if (action.button === 0) {
     return state.set('pointer', new Map()).set('moved', false)
   }
+  if (state.get('gameover')) {
+    return newGameState()
+  }
   if (state.get('pointer').isEmpty()) {
     return updatePointer(state, action)
   }
   if (!state.get('moved')) {
-    if (state.get('gameover')) {
-      return initialState()
-    }
     const values = state.get('values')
     let movedValues = values
     if (action.y - state.getIn(['pointer', 'y']) < -POINTER_GAP) {
@@ -51,13 +51,15 @@ const updateOnPointerMove = (state, action) => {
   return state
 }
 
-const updateOnKeyPress = (state, action) => {
+const updateOnKeyUp = (state, action) => {
   if (state.get('gameover')) {
-    return initialState()
+    return newGameState()
   }
   const values = state.get('values')
   let movedValues = values
   switch (action.key) {
+    case 'Escape':
+      return newGameState()
     case 'ArrowUp':
       movedValues = moveNumbersUp(values)
       break
@@ -194,17 +196,24 @@ const moveNumbersRight = (values) =>
 // ------------------------------------
 export function pointerMove (button, x, y) {
   return {
-    type    : POINTER_MOVE,
+    type    : POINTER,
     button  : button,
     x       : x,
     y       : y
   }
 }
 
-export function keyPress (key) {
+export function keyUp (key) {
   return {
-    type    : KEY_PRESS,
+    type    : KEY_UP,
     key     : key
+  }
+}
+
+export function click (key) {
+  return {
+    type    : POINTER,
+    button  : 1
   }
 }
 
@@ -212,20 +221,27 @@ export function keyPress (key) {
 // Action Handlers
 // ------------------------------------
 const ACTION_HANDLERS = {
-  [POINTER_MOVE]    : (state, action) => updateOnPointerMove(state, action),
-  [KEY_PRESS]       : (state, action) => updateOnKeyPress(state, action)
+  [POINTER]    : (state, action) => updateOnPointerMove(state, action),
+  [KEY_UP]          : (state, action) => updateOnKeyUp(state, action),
 }
 
 // ------------------------------------
 // Reducer
 // ------------------------------------
-const initialState = () => addNumber(addNumber(fromJS({
+const newGameState = () => addNumber(addNumber(fromJS({
   values: EMPTY_TABLE,
   pointer: {}
 })))
 
-export default function counterReducer (state = initialState(), action) {
+const initialState = localStorage.getItem('state')
+  ? fromJS(JSON.parse(localStorage.getItem('state')))
+  : newGameState()
+
+export default function counterReducer (state = initialState, action) {
   const handler = ACTION_HANDLERS[action.type]
 
-  return handler ? handler(state, action) : state
+  const newState = handler ? handler(state, action) : state
+
+  localStorage.setItem('state', JSON.stringify(newState.toJS()))
+  return newState
 }
