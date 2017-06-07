@@ -10,7 +10,7 @@ export const _2048 = ({ values, pointerMove, keyUp, click, gameover }) => (
       autoFocus
       onKeyPress={(e) => { e.preventDefault() }}
       onKeyUp={(e) => keyUp(e.key)}
-      onMouseMove={(e) => pointerMove(e.buttons, e.screenX, e.screenY)}
+      onMouseMove={(e) => (e.buttons === 1) && pointerMove(e.screenX, e.screenY)}
       onClick={click}
     />
     <table className='_2048__table' >

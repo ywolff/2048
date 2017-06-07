@@ -3,8 +3,9 @@ import { Map, fromJS } from 'immutable'
 // ------------------------------------
 // Constants
 // ------------------------------------
-export const POINTER = 'POINTER'
+export const POINTER_MOVE = 'POINTER_MOVE'
 export const KEY_UP = 'KEY_UP'
+export const CLICK = 'CLICK'
 
 const TABLE_SIZE = 4
 const EMPTY_TABLE = [
@@ -20,12 +21,6 @@ const FOUR_PROBABILITY = 0.125
 // Functions
 // ------------------------------------
 const updateOnPointerMove = (state, action) => {
-  if (action.button === 0) {
-    return state.set('pointer', new Map()).set('moved', false)
-  }
-  if (state.get('gameover')) {
-    return newGameState()
-  }
   if (state.get('pointer').isEmpty()) {
     return updatePointer(state, action)
   }
@@ -45,10 +40,20 @@ const updateOnPointerMove = (state, action) => {
       return updatePointer(addNumber(state.set('values', movedValues)), action).set('moved', true)
     }
     if (gameover(values)) {
-      return state.set('gameover', true).set('moved', true)
+      return state.set('willBeGameover', true).set('moved', true)
     }
   }
   return state
+}
+
+const updateOnClick = (state) => {
+  if (state.get('gameover')) {
+    return newGameState()
+  }
+  if (state.get('willBeGameover')) {
+    return state.set('gameover', true)
+  }
+  return state.set('pointer', new Map()).set('moved', false)
 }
 
 const updateOnKeyUp = (state, action) => {
@@ -194,10 +199,9 @@ const moveNumbersRight = (values) =>
 // ------------------------------------
 // Actions
 // ------------------------------------
-export function pointerMove (button, x, y) {
+export function pointerMove (x, y) {
   return {
-    type    : POINTER,
-    button  : button,
+    type    : POINTER_MOVE,
     x       : x,
     y       : y
   }
@@ -212,8 +216,7 @@ export function keyUp (key) {
 
 export function click (key) {
   return {
-    type    : POINTER,
-    button  : 1
+    type    : CLICK
   }
 }
 
@@ -221,8 +224,9 @@ export function click (key) {
 // Action Handlers
 // ------------------------------------
 const ACTION_HANDLERS = {
-  [POINTER]    : (state, action) => updateOnPointerMove(state, action),
+  [POINTER_MOVE]    : (state, action) => updateOnPointerMove(state, action),
   [KEY_UP]          : (state, action) => updateOnKeyUp(state, action),
+  [CLICK]          : (state, action) => updateOnClick(state, action),
 }
 
 // ------------------------------------
